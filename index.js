@@ -7,6 +7,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
+const axios = require('axios');
 const app = express();
 const port = 5000;
 
@@ -149,6 +150,13 @@ app.post('/filter-and-download', writeRateLimiter, async (req, res) => {
 
     // Convert filtered rows to CSV and send as a file
     const csvData = rowsToCsv(filteredRows);
+
+    await axios.post('https://hook.us1.make.com/pq4noj170gr728pwy7n71g8758p51kro', {
+      message: 'A new lead has been downloaded.',
+      filters: { Role, Industry, Country, CNAE },
+      timestamp: new Date().toISOString()
+    });
+
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename=filtered_leads.csv');
     res.send(csvData);
